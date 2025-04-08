@@ -10,7 +10,10 @@ interface ScenarioSelectorProps {
 export default function ScenarioSelector({ onSelect }: ScenarioSelectorProps) {
   const [scenario, setScenario] = useState<ScenarioType>('classic');
   const [playerCount, setPlayerCount] = useState<number>(
-    scenario === 'capo' ? 12 : 6
+    scenario === 'classic' ? 6 :
+    scenario === 'capo' ? 12 :
+    scenario === 'zodiac' ? 9 :
+    scenario === 'jack' ? 9 : 6
   );
 
   const handleScenarioChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -20,13 +23,45 @@ export default function ScenarioSelector({ onSelect }: ScenarioSelectorProps) {
     // Adjust player count based on scenario selection
     if (newScenario === 'capo' && playerCount < 12) {
       setPlayerCount(12);
+    } else if (newScenario === 'zodiac' && playerCount < 9) {
+      setPlayerCount(9);
+    } else if (newScenario === 'jack' && playerCount < 9) {
+      setPlayerCount(9);
     } else if (newScenario === 'classic' && playerCount < 6) {
       setPlayerCount(6);
     }
   };
 
-  const getMinPlayers = () => (scenario === 'capo' ? 12 : 6);
-  const getMaxPlayers = () => (scenario === 'capo' ? 13 : 15);
+  const getMinPlayers = () => {
+    switch(scenario) {
+      case 'capo': return 12;
+      case 'zodiac': return 9;
+      case 'jack': return 9;
+      default: return 6; // classic
+    }
+  };
+  
+  const getMaxPlayers = () => {
+    switch(scenario) {
+      case 'capo': return 13;
+      case 'zodiac': return 12;
+      case 'jack': return 12;
+      default: return 15; // classic
+    }
+  };
+
+  const getScenarioDescription = () => {
+    switch(scenario) {
+      case 'capo':
+        return 'Capo Scenario: Complex game with 12-13 players and special roles.';
+      case 'zodiac':
+        return 'Zodiac Scenario: Includes an independent serial killer role (Zodiac) playing solo.';
+      case 'jack':
+        return 'Jack Scenario: Features Jack Sparrow as an independent role who must win alone.';
+      default:
+        return 'Classic Scenario: Traditional game with simpler roles.';
+    }
+  };
 
   return (
     <div className="bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-lg p-6 max-w-md w-full mx-auto border border-gray-200 dark:border-gray-700 backdrop-blur-md">
@@ -44,11 +79,11 @@ export default function ScenarioSelector({ onSelect }: ScenarioSelectorProps) {
         >
           <option value="classic">Classic Mafia</option>
           <option value="capo">Capo Scenario</option>
+          <option value="zodiac">Zodiac Scenario</option>
+          <option value="jack">Jack Sparrow Scenario</option>
         </select>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {scenario === 'capo' 
-            ? 'Capo Scenario: Complex game with 12-13 players and special roles.' 
-            : 'Classic Scenario: Traditional game with simpler roles.'}
+          {getScenarioDescription()}
         </p>
       </div>
       

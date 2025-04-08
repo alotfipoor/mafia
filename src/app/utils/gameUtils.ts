@@ -1,9 +1,22 @@
 import { v4 as uuidv4 } from 'uuid';
-import { CAPO_ROLES, CLASSIC_ROLES, GameState, Player, Role, ScenarioType } from '../models/types';
+import { 
+  CAPO_ROLES, 
+  CLASSIC_ROLES, 
+  ZODIAC_ROLES, 
+  JACK_ROLES, 
+  GameState, 
+  Player, 
+  Role, 
+  ScenarioType 
+} from '../models/types';
 
 export const assignRoles = (playerNames: string[], scenario: ScenarioType): Player[] => {
   if (scenario === 'capo') {
     return assignCapoRoles(playerNames);
+  } else if (scenario === 'zodiac') {
+    return assignZodiacRoles(playerNames);
+  } else if (scenario === 'jack') {
+    return assignJackRoles(playerNames);
   } else {
     return assignClassicRoles(playerNames);
   }
@@ -58,6 +71,78 @@ const assignClassicRoles = (playerNames: string[]): Player[] => {
   return assignRolesFromDistribution(playerNames, CLASSIC_ROLES, roleDistribution);
 };
 
+const assignZodiacRoles = (playerNames: string[]): Player[] => {
+  const numPlayers = playerNames.length;
+  
+  // Validate number of players
+  if (numPlayers < 9 || numPlayers > 12) {
+    throw new Error('Zodiac scenario requires 9-12 players');
+  }
+  
+  // Define how many of each role
+  const roleDistribution: Record<string, number> = {
+    alCapone: 1,
+    illusionist: 1,
+    bomber: 1,
+    zodiac: 1,
+    protector: 1,
+    ocean: 1,
+    gunsmith: 1,
+    professional: 1,
+    detective: 1,
+    doctor: 1,
+    citizen: numPlayers - 10, // Remaining players as simple citizens
+  };
+  
+  // If we have fewer than 11 players, start removing roles
+  if (numPlayers < 11) {
+    roleDistribution.bomber = 0;
+    roleDistribution.citizen += 1;
+  }
+  
+  if (numPlayers < 10) {
+    roleDistribution.illusionist = 0;
+    roleDistribution.citizen += 1;
+  }
+  
+  return assignRolesFromDistribution(playerNames, ZODIAC_ROLES, roleDistribution);
+};
+
+const assignJackRoles = (playerNames: string[]): Player[] => {
+  const numPlayers = playerNames.length;
+  
+  // Validate number of players
+  if (numPlayers < 9 || numPlayers > 12) {
+    throw new Error('Jack scenario requires 9-12 players');
+  }
+  
+  // Define how many of each role
+  const roleDistribution: Record<string, number> = {
+    godfather: 1,
+    saulGoodman: 1,
+    matador: 1,
+    jackSparrow: 1,
+    drWatson: 1,
+    leon: 1,
+    citizenKane: 1,
+    constantine: 1,
+    citizen: numPlayers - 8, // Remaining players as simple citizens
+  };
+  
+  // If we have fewer than required players, adjust roles
+  if (numPlayers < 11) {
+    roleDistribution.matador = 0;
+    roleDistribution.citizen += 1;
+  }
+  
+  if (numPlayers < 10) {
+    roleDistribution.constantine = 0;
+    roleDistribution.citizen += 1;
+  }
+  
+  return assignRolesFromDistribution(playerNames, JACK_ROLES, roleDistribution);
+};
+
 const assignRolesFromDistribution = (
   playerNames: string[], 
   roleDefinitions: Record<string, Role>, 
@@ -92,13 +177,53 @@ export const shuffleArray = <T>(array: T[]): T[] => {
 };
 
 export const createNewGame = (playerNames: string[], scenario: ScenarioType): GameState => {
-  return {
+  const players = assignRoles(playerNames, scenario);
+  
+  // Initialize base game state
+  const gameState: GameState = {
     scenario,
-    players: assignRoles(playerNames, scenario),
+    players,
     phase: 'setup',
     round: 0,
     gameLog: [`Game started with ${playerNames.length} players in ${scenario} scenario.`],
   };
+  
+  // Initialize scenario-specific state
+  if (scenario === 'zodiac') {
+    // For Zodiac scenario, initialize Professional and Protector with vests
+    players.forEach(player => {
+      if (player.role.name === 'Professional') {
+        player.hasVest = true;
+      }
+    });
+    
+    gameState.zodiacScenario = {
+      roleInquiriesLeft: 2,
+      bombActive: false,
+    };
+  }
+  
+  if (scenario === 'jack') {
+    // For Jack scenario, initialize Godfather and Leon with vests
+    players.forEach(player => {
+      if (player.role.name === 'Godfather' || player.role.name === 'Leon') {
+        player.hasVest = true;
+      }
+      
+      // Initialize Jack with empty cursed array
+      if (player.role.name === 'Jack Sparrow') {
+        player.hasCursed = [];
+      }
+    });
+    
+    gameState.jackScenario = {
+      revealedJack: false,
+      beautifulMindUsed: false,
+      lastActionCards: {}
+    };
+  }
+  
+  return gameState;
 };
 
 export const saveGame = (gameState: GameState): void => {
