@@ -58,12 +58,12 @@ export default function PlayerNameInput({
   };
 
   return (
-    <div className="bg-gray-900 rounded-xl shadow-lg p-6 w-full max-w-2xl mx-auto border border-gray-700">
+    <div className="bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-lg p-6 w-full max-w-2xl mx-auto border border-gray-200 dark:border-gray-700 backdrop-blur-md">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-amber-500">Enter Player Names</h2>
+        <h2 className="text-2xl font-bold text-indigo-600 dark:text-amber-500">Enter Player Names</h2>
         <button 
           onClick={resetGame}
-          className="text-gray-400 hover:text-amber-500 transition-colors"
+          className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-amber-500 transition-colors"
           aria-label="Reset game"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,7 +72,7 @@ export default function PlayerNameInput({
         </button>
       </div>
       
-      <p className="text-gray-400 mb-6">
+      <p className="text-gray-600 dark:text-gray-400 mb-6">
         Setting up a {scenario} game with {playerCount} players.
       </p>
       
@@ -82,7 +82,7 @@ export default function PlayerNameInput({
             <div key={index} className="mb-3">
               <label 
                 htmlFor={`player-${index}`}
-                className="block text-gray-300 font-medium mb-2"
+                className="block text-gray-700 dark:text-gray-300 font-medium mb-2"
               >
                 Player {index + 1}
               </label>
@@ -92,7 +92,7 @@ export default function PlayerNameInput({
                 value={name}
                 onChange={(e) => handleNameChange(index, e.target.value)}
                 placeholder={`Player ${index + 1}`}
-                className="w-full p-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full p-3 bg-white/90 dark:bg-gray-800/90 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-amber-500"
                 required
               />
             </div>
@@ -103,13 +103,13 @@ export default function PlayerNameInput({
           <button
             type="button"
             onClick={onBack}
-            className="flex-1 bg-gray-700 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+            className="flex-1 bg-gray-200/90 dark:bg-gray-700/90 text-gray-800 dark:text-white py-3 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900"
           >
             Back
           </button>
           <button
             type="submit"
-            className="flex-1 bg-amber-600 text-white py-3 px-4 rounded-lg hover:bg-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+            className="flex-1 bg-indigo-600 dark:bg-amber-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900"
           >
             Start Game
           </button>

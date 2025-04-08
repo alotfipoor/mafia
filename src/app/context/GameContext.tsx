@@ -49,9 +49,17 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetGame = () => {
+    // Clear game state
     setGameState(null);
+    
+    // Clear localStorage
     if (typeof window !== 'undefined') {
       localStorage.removeItem('mafiaGameState');
+    }
+    
+    // Force a reload to ensure the UI is reset
+    if (typeof window !== 'undefined') {
+      window.location.href = window.location.pathname;
     }
   };
 
