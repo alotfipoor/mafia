@@ -214,7 +214,7 @@ export default function GameBoard() {
             </h1>
             <button 
               onClick={resetGame}
-              className="sm:hidden flex items-center text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-amber-500 transition-colors"
+              className="sm:hidden flex items-center text-gray-600 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-amber-500 transition-colors"
               aria-label="Return to home"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -224,7 +224,7 @@ export default function GameBoard() {
             </button>
           </div>
           <div className="flex items-center mt-2">
-            <div className="mr-4 text-gray-600 dark:text-gray-400">Round {gameState.round}</div>
+            <div className="mr-4 text-gray-600 dark:text-gray-300">Round {gameState.round}</div>
             <div className="px-3 py-1 bg-indigo-100/90 dark:bg-gray-800/90 text-indigo-700 dark:text-amber-500 rounded-full font-medium shadow-sm">
               {getPhaseDisplay()}
             </div>
@@ -248,7 +248,7 @@ export default function GameBoard() {
 
       {/* Game status banner */}
       {gameStatus && (
-        <div className="mb-6 p-4 bg-indigo-100/90 dark:bg-amber-800/90 text-indigo-800 dark:text-white rounded-lg font-bold text-center text-xl shadow-md backdrop-blur-sm">
+        <div className="mb-6 p-4 bg-indigo-100/90 dark:bg-amber-800/90 text-indigo-800 dark:text-gray-100 rounded-lg font-bold text-center text-xl shadow-md backdrop-blur-sm">
           {gameStatus}
         </div>
       )}
@@ -256,7 +256,7 @@ export default function GameBoard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <div className="bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-gray-700 backdrop-blur-md">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Players</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Players</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
               {gameState.players.map((player) => (
                 <div 
@@ -319,7 +319,7 @@ export default function GameBoard() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleBulletSelection('blank')}
-                          className="flex-1 py-3 bg-gray-200/90 dark:bg-gray-700/90 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 shadow-sm"
+                          className="flex-1 py-3 bg-gray-200/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 shadow-sm"
                         >
                           First Bullet: Blank
                         </button>
@@ -344,7 +344,7 @@ export default function GameBoard() {
                   )}
                   <button
                     onClick={handleResetCapo}
-                    className="w-full py-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100/80 dark:hover:bg-gray-800/80 backdrop-blur-sm"
+                    className="w-full py-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100/80 dark:hover:bg-gray-800/80 backdrop-blur-sm"
                   >
                     Reset Capo Controls
                   </button>
@@ -366,7 +366,7 @@ export default function GameBoard() {
           
           <div className="mt-6 bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-gray-700 backdrop-blur-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Controls</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Controls</h2>
             </div>
             <div className="flex flex-col space-y-3">
               <button
@@ -377,7 +377,7 @@ export default function GameBoard() {
               </button>
               <button
                 onClick={resetGame}
-                className="w-full py-3 px-4 bg-gray-200/90 dark:bg-gray-700/90 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none flex items-center justify-center shadow-sm"
+                className="w-full py-3 px-4 bg-gray-200/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none flex items-center justify-center shadow-sm"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -391,7 +391,7 @@ export default function GameBoard() {
         {/* Game Log */}
         <div className={`${showLog ? 'block' : 'hidden lg:block'}`}>
           <div className="bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-lg p-4 sm:p-6 h-full border border-gray-200 dark:border-gray-700 backdrop-blur-md">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Game Log</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Game Log</h2>
             <div className="overflow-y-auto max-h-[500px] space-y-2">
               {gameState.gameLog.map((entry, index) => (
                 <div key={index} className="py-2 border-b border-gray-200 dark:border-gray-800 last:border-0">

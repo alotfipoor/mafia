@@ -31,7 +31,7 @@ export default function RoleReveal({ players, onComplete }: RoleRevealProps) {
         <h1 className="text-3xl font-bold text-indigo-600 dark:text-amber-500 drop-shadow-md">Role Reveal</h1>
         <button 
           onClick={resetGame}
-          className="flex items-center text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-amber-500 transition-colors"
+          className="flex items-center text-gray-600 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-amber-500 transition-colors"
           aria-label="Return to home"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,7 +42,7 @@ export default function RoleReveal({ players, onComplete }: RoleRevealProps) {
       </div>
 
       <div className="mb-4 text-center">
-        <p className="text-gray-600 dark:text-gray-400 backdrop-blur-sm inline-block px-3 py-1 rounded-lg">
+        <p className="text-gray-600 dark:text-gray-300 backdrop-blur-sm inline-block px-3 py-1 rounded-lg">
           Player {currentPlayerIndex + 1} of {players.length}
         </p>
         <div className="w-full bg-gray-200/80 dark:bg-gray-700/80 rounded-full h-2.5 mt-2 backdrop-blur-sm shadow-sm">
@@ -57,7 +57,7 @@ export default function RoleReveal({ players, onComplete }: RoleRevealProps) {
       />
 
       <div className="mt-6 text-center">
-        <p className="text-gray-600 dark:text-gray-400 bg-white/30 dark:bg-black/30 backdrop-blur-sm inline-block px-4 py-2 rounded-lg shadow-sm">
+        <p className="text-gray-600 dark:text-gray-300 bg-white/30 dark:bg-black/30 backdrop-blur-sm inline-block px-4 py-2 rounded-lg shadow-sm">
           Pass the device to {currentPlayer.name} and click Reveal Role
         </p>
       </div>

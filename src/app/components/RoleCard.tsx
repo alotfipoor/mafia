@@ -24,15 +24,19 @@ export default function RoleCard({ player, onNext, isLast = false }: RoleCardPro
   return (
     <div className="bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-lg p-6 max-w-md w-full mx-auto min-h-[320px] flex flex-col border border-gray-200 dark:border-gray-700 backdrop-blur-md">
       {!isRevealed ? (
-        <div className="flex flex-col items-center justify-center flex-grow">
-          <h2 className="text-2xl font-bold mb-4 text-indigo-600 dark:text-amber-500">{player.name}</h2>
-          <p className="mb-6 text-gray-600 dark:text-gray-400">Click to reveal your role</p>
-          <button
-            onClick={handleReveal}
-            className="bg-indigo-600 dark:bg-amber-600 text-white py-3 px-8 rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 shadow-lg"
-          >
-            Reveal Role
-          </button>
+        <div className="flex flex-col justify-between flex-grow">
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="text-2xl font-bold mb-4 text-indigo-600 dark:text-amber-500">{player.name}</h2>
+            <p className="mb-6 text-gray-600 dark:text-gray-300">Click to reveal your role</p>
+          </div>
+          <div className="mt-auto">
+            <button
+              onClick={handleReveal}
+              className="w-full bg-indigo-600 dark:bg-amber-600 text-white py-3 px-8 rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 shadow-lg"
+            >
+              Reveal Role
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col flex-grow">
@@ -50,7 +54,7 @@ export default function RoleCard({ player, onNext, isLast = false }: RoleCardPro
               </span>
             </div>
             
-            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">
               {player.role.name}
             </h3>
             
@@ -64,12 +68,14 @@ export default function RoleCard({ player, onNext, isLast = false }: RoleCardPro
             )}
           </div>
           
-          <button
-            onClick={handleNext}
-            className="w-full bg-indigo-600 dark:bg-amber-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 mt-4 shadow-md"
-          >
-            {isLast ? 'Start Game' : 'Next Player'}
-          </button>
+          <div className="mt-auto">
+            <button
+              onClick={handleNext}
+              className="w-full bg-indigo-600 dark:bg-amber-600 text-white py-3 px-8 rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 shadow-lg"
+            >
+              {isLast ? 'Start Game' : 'Next Player'}
+            </button>
+          </div>
         </div>
       )}
     </div>
