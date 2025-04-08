@@ -5,6 +5,7 @@ import { GameProvider } from "./context/GameContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
 import BackgroundEffects from "./components/BackgroundEffects";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +38,7 @@ export default function RootLayout({
                 Developed by <a href="https://alotfipoor.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">Ashkan</a> &copy; {new Date().getFullYear()}
               </p>
             </footer>
+            <Analytics />
           </GameProvider>
         </ThemeProvider>
       </body>
