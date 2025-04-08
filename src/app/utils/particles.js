@@ -117,7 +117,6 @@ function handleMouseMove(e, container) {
     const moveY = (e.clientY / window.innerHeight - 0.5) * 5;
     
     spheres.forEach(sphere => {
-        const currentTransform = getComputedStyle(sphere).transform;
         sphere.style.transform = `translate(${moveX}px, ${moveY}px)`;
     });
 } 

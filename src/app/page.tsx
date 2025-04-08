@@ -1,17 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ScenarioType } from './models/types';
 import { useGameContext } from './context/GameContext';
-import ScenarioSelector from './components/ScenarioSelector';
-import PlayerNameInput from './components/PlayerNameInput';
 import RoleReveal from './components/RoleReveal';
 import GameBoard from './components/GameBoard';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Home() {
-  const { gameState, startGame, advancePhase } = useGameContext();
+  const { gameState, advancePhase } = useGameContext();
 
   // If there's no game state, show the welcome/landing page content
   if (!gameState) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { GameState, Player, ScenarioType } from '../models/types';
+import { GameState, ScenarioType } from '../models/types';
 import { createNewGame, loadGame, saveGame } from '../utils/gameUtils';
 
 interface GameContextType {

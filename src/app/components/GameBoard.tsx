@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Player, GameState } from '../models/types';
+import { Player } from '../models/types';
 import { useGameContext } from '../context/GameContext';
 
 export default function GameBoard() {
@@ -41,7 +41,7 @@ export default function GameBoard() {
     
     switch (gameState.phase) {
       case 'night':
-        // Night actions depend on the player's role
+        // Night actions depend on the player&apos;s role
         if (gameState.scenario === 'classic') {
           if (gameState.players.find(p => p.id === selectedPlayer)?.role.name === 'Doctor') {
             savePlayerRole(selectedPlayer);
@@ -102,7 +102,7 @@ export default function GameBoard() {
     
     // If we have two targets, proceed to temporary night phase
     if (newTargets.length === 2) {
-      addToGameLog(`Temporary night phase initiated for Capo's gun.`);
+      addToGameLog(`Temporary night phase initiated for Capo&apos;s gun.`);
     }
   };
 
@@ -111,7 +111,7 @@ export default function GameBoard() {
       setFirstBullet(bulletType);
       addToGameLog(`First bullet loaded: ${bulletType}`);
     } else {
-      // Execute Capo's gun logic
+      // Execute Capo&apos;s gun logic
       const target1 = gameState.players.find(p => p.id === capoTargets[0]);
       const target2 = gameState.players.find(p => p.id === capoTargets[1]);
       
@@ -163,6 +163,8 @@ export default function GameBoard() {
     }
   };
 
+  // Commenting out unused function
+  /* 
   const getPlayerStatus = (player: Player) => {
     if (!player.isAlive) return 'Eliminated';
     if (capoTargets.includes(player.id)) return 'Target';
@@ -171,6 +173,7 @@ export default function GameBoard() {
     if (player.isRevealed) return player.role.name;
     return 'Active';
   };
+  */
 
   const getPlayerStatusClass = (player: Player) => {
     if (!player.isAlive) return 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300';
@@ -312,7 +315,7 @@ export default function GameBoard() {
                     </>
                   ) : firstBullet === null ? (
                     <>
-                      <p className="text-indigo-600 dark:text-amber-500 mb-2">Load Capo's Gun</p>
+                      <p className="text-indigo-600 dark:text-amber-500 mb-2">Load Capo&apos;s Gun</p>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleBulletSelection('blank')}
