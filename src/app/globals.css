@@ -175,12 +175,18 @@ body {
   background: #333;
 }
 
-.bg-white, 
-.bg-gray-100 {
-  background-color: rgba(255, 255, 255, 0.85);
+/* Add backdrop blur without overriding Tailwind colors */
+.backdrop-blur {
+  backdrop-filter: blur(8px);
 }
 
-.bg-white, .dark\:bg-gray-900, .bg-gray-100, .dark\:bg-gray-800 {
-  backdrop-filter: blur(8px);
+/* Dark mode background with transparency */
+.dark .dark-bg-blur {
+  background-color: rgba(17, 24, 39, 0.85);
+}
+
+/* Light mode background with transparency */
+.light-bg-blur {
+  background-color: rgba(255, 255, 255, 0.85);
 }
 

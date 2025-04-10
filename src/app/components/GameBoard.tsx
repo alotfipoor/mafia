@@ -28,6 +28,7 @@ export default function GameBoard() {
   const [capoTargets, setCapoTargets] = useState<string[]>([]);
   const [showCapoControls, setShowCapoControls] = useState<boolean>(false);
   const [firstBullet, setFirstBullet] = useState<'blank' | 'live' | null>(null);
+  const [showTimer, setShowTimer] = useState<boolean>(false);
   
   // Reset selected player when phase changes
   useEffect(() => {
@@ -230,23 +231,13 @@ export default function GameBoard() {
   const gameStatus = checkGameStatus();
 
   return (
-    <div className="container mx-auto px-4 py-6 mb-16">
+    <div className="container mx-auto px-4 py-6 mb-20">
       <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <div className="flex justify-between items-center">
             <h1 className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-amber-500 drop-shadow-md">
               Mafia Game - {gameState.scenario.charAt(0).toUpperCase() + gameState.scenario.slice(1)}
             </h1>
-            <button 
-              onClick={resetGame}
-              className="sm:hidden flex items-center text-gray-600 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-amber-500 transition-colors"
-              aria-label="Return to home"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Home
-            </button>
           </div>
           <div className="flex items-center mt-2">
             <div className="mr-4 text-gray-600 dark:text-gray-300">Round {gameState.round}</div>
@@ -255,7 +246,9 @@ export default function GameBoard() {
             </div>
           </div>
         </div>
-        <div className="flex space-x-2">
+        
+        {/* Top right buttons - only show on larger screens - removed theme toggle */}
+        <div className="hidden md:flex space-x-2">
           <button
             onClick={() => setShowLog(!showLog)}
             className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-colors backdrop-blur-sm"
@@ -263,10 +256,10 @@ export default function GameBoard() {
             {showLog ? 'Hide Log' : 'Show Log'}
           </button>
           <button
-            onClick={resetGame}
-            className="hidden sm:block px-4 py-2 bg-red-600/90 dark:bg-red-700/90 text-white rounded-lg hover:bg-red-500 dark:hover:bg-red-600 transition-colors backdrop-blur-sm shadow-sm"
+            onClick={() => advancePhase()}
+            className="px-4 py-2 bg-indigo-600 dark:bg-amber-600 text-white rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors backdrop-blur-sm shadow-sm"
           >
-            Reset Game
+            Next Phase
           </button>
         </div>
       </div>
@@ -413,7 +406,7 @@ export default function GameBoard() {
           </div>
         </div>
         
-        {/* Game Log */}
+        {/* Game Log - hidden on mobile by default unless toggled */}
         <div className={`${showLog ? 'block' : 'hidden lg:block'}`}>
           <div className="bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-lg p-4 sm:p-6 h-full border border-gray-200 dark:border-gray-700 backdrop-blur-md">
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Game Log</h2>
@@ -428,26 +421,213 @@ export default function GameBoard() {
         </div>
       </div>
 
-      {/* Add the ActionPanel */}
+      {/* Improved mobile bottom navigation bar - increase z-index */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-3 px-4 z-[999] md:hidden">
+        <div className="flex justify-between items-center">
+          <button
+            onClick={resetGame}
+            className="flex flex-col items-center text-indigo-600 dark:text-amber-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span className="text-xs mt-1">Home</span>
+          </button>
+          
+          <button
+            onClick={() => setShowLog(!showLog)}
+            className="flex flex-col items-center text-indigo-600 dark:text-amber-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span className="text-xs mt-1">Log</span>
+          </button>
+          
+          <button
+            onClick={() => setShowTimer(!showTimer)}
+            className="flex flex-col items-center text-indigo-600 dark:text-amber-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-xs mt-1">Timer</span>
+          </button>
+
+          <button
+            onClick={advancePhase}
+            className="flex flex-col items-center text-indigo-600 dark:text-amber-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <span className="text-xs mt-1">Next</span>
+          </button>
+          
+          {/* Mobile menu button - opens up more options */}
+          <button 
+            onClick={() => document.getElementById('mobile-menu')?.classList.toggle('hidden')}
+            className="flex flex-col items-center text-indigo-600 dark:text-amber-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+            <span className="text-xs mt-1">More</span>
+          </button>
+        </div>
+      </div>
+      
+      {/* Improved mobile menu popup - positioned higher to avoid overlapping with navbar */}
+      <div 
+        id="mobile-menu" 
+        className="fixed bottom-20 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[1000] hidden"
+      >
+        <div className="space-y-3">
+          {gameState.phase === 'night' && gameState.round > 1 && (
+            <button 
+              className="flex items-center w-full px-4 py-2 text-left bg-indigo-100 dark:bg-gray-700 text-indigo-700 dark:text-amber-400 rounded-lg"
+              onClick={() => {
+                document.getElementById('night-actions-panel')?.classList.toggle('hidden');
+                document.getElementById('mobile-menu')?.classList.add('hidden');
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              Night Actions
+            </button>
+          )}
+          
+          {gameState.scenario === 'capo' && (
+            <>
+              <button 
+                className="flex items-center w-full px-4 py-2 text-left bg-indigo-100 dark:bg-gray-700 text-indigo-700 dark:text-amber-400 rounded-lg"
+                onClick={() => {
+                  setShowCapoControls(prev => !prev);
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Capo Controls
+              </button>
+              
+              <button 
+                className="flex items-center w-full px-4 py-2 text-left bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg"
+                onClick={() => {
+                  document.getElementById('village-chief-panel')?.classList.toggle('hidden');
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Village Chief Links
+              </button>
+              
+              <button 
+                className="flex items-center w-full px-4 py-2 text-left bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg"
+                onClick={() => {
+                  document.getElementById('poison-panel')?.classList.toggle('hidden');
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+                Poison Controls
+              </button>
+            </>
+          )}
+
+          {gameState.scenario === 'zodiac' && (
+            <button 
+              className="flex items-center w-full px-4 py-2 text-left bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg"
+              onClick={() => {
+                document.getElementById('bomb-defusal-panel')?.classList.toggle('hidden');
+                document.getElementById('mobile-menu')?.classList.add('hidden');
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Bomb Defusal
+            </button>
+          )}
+          
+          <button 
+            className="flex items-center w-full px-4 py-2 text-left bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
+            onClick={() => {
+              document.querySelector('html')?.classList.toggle('dark');
+              document.getElementById('mobile-menu')?.classList.add('hidden');
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            Toggle Theme
+          </button>
+        </div>
+      </div>
+
+      {/* Hidden container for night actions panel */}
+      <div id="night-actions-panel" className="fixed top-20 right-4 z-[900] hidden">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Night Actions</h2>
+            <button
+              onClick={() => document.getElementById('night-actions-panel')?.classList.add('hidden')}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          {/* Night actions content will be rendered by the NightActionPanel component */}
+        </div>
+      </div>
+
+      {/* Timer container - with proper dark mode support */}
+      <div id="timer-container" className={`fixed bottom-20 left-4 z-[900] ${showTimer ? 'block' : 'hidden'}`}>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-64">
+          {/* Timer content will be inserted here by GameTimer component */}
+        </div>
+      </div>
+
+      {/* Hidden container for Village Chief Panel */}
+      <div id="village-chief-panel" className="fixed top-20 right-4 z-[900] hidden">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+          <VillageChiefPanel />
+        </div>
+      </div>
+
+      {/* Hidden container for Poison Controls */}
+      <div id="poison-panel" className="fixed top-20 right-4 z-[900] hidden">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+          <PoisonVotePanel />
+        </div>
+      </div>
+
+      {/* Hidden container for Bomb Defusal */}
+      <div id="bomb-defusal-panel" className="fixed top-20 right-4 z-[900] hidden">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+          <BombDefusalPanel />
+        </div>
+      </div>
+
+      {/* These components now will use the containers above instead of rendering their own floating UIs */}
       <ActionPanel />
-      
-      {/* Add the BombDefusalPanel */}
-      <BombDefusalPanel />
-      
-      {/* Add the RoleInquiryPanel */}
-      <RoleInquiryPanel />
-      
-      {/* Add the CapoTrusteePanel */}
-      <CapoTrusteePanel />
-      
-      {/* Add the PoisonVotePanel */}
-      <PoisonVotePanel />
-      
-      {/* Add the VillageChiefPanel */}
-      <VillageChiefPanel />
-      
-      {/* Add the GameTimer */}
       <GameTimer />
+
+      {/* Remove these since we now have dedicated panels for them */}
+      {/* <BombDefusalPanel /> */}
+      {/* <RoleInquiryPanel /> */}
+      {/* <CapoTrusteePanel /> */}
+      {/* <VillageChiefPanel /> */}
+      {/* <PoisonVotePanel /> */}
     </div>
   );
 } 

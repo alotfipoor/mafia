@@ -236,48 +236,42 @@ export default function PoisonVotePanel() {
   };
   
   return (
-    <div className="fixed bottom-16 right-4 z-20">
-      {!showPanel ? (
-        <button
-          onClick={() => setShowPanel(true)}
-          className="px-4 py-2 bg-red-600/90 dark:bg-red-700/90 text-white rounded-lg shadow-lg hover:bg-red-500 dark:hover:bg-red-600 transition-colors"
-        >
-          Poison Controls
-        </button>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-w-xl w-full">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Poison Management</h2>
-            <button
-              onClick={() => setShowPanel(false)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          {renderPoisonTargetSelector()}
-          {renderVotingPanel()}
-          {renderAntidoteDecision()}
-          
-          {/* Reset button - only show if we have a poisoned player */}
-          {poisonedPlayerId && (
-            <button
-              onClick={() => {
-                setPoisonedPlayerId(null);
-                setVotes({});
-                setVotingComplete(false);
-                setShowResult(false);
-              }}
-              className="w-full py-2 mt-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
-            >
-              Reset Poison State
-            </button>
-          )}
+    <div className="w-full">
+      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Poison Controls</h2>
+      
+      {/* Content of Poison Vote Panel */}
+      <div className="mb-4">
+        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+          Herbalist has poisoned a player. The village must vote whether to administer the antidote.
+        </p>
+        
+        {/* Poisoned player information */}
+        <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg mb-4">
+          <p className="text-red-800 dark:text-red-300 font-medium">
+            Current poisoned player: {poisonedPlayerId ? gameState.players.find(p => p.id === poisonedPlayerId)?.name : 'None'}
+          </p>
         </div>
-      )}
+        
+        {/* Voting controls */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <button className="py-2 bg-green-600 text-white rounded-lg hover:bg-green-500">
+            Give Antidote
+          </button>
+          <button className="py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
+            Deny Antidote
+          </button>
+        </div>
+      </div>
+      
+      <button
+        className="w-full py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+        onClick={() => {
+          // Close panel
+          document.getElementById('poison-panel')?.classList.add('hidden');
+        }}
+      >
+        Close
+      </button>
     </div>
   );
 } 

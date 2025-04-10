@@ -169,40 +169,34 @@ export default function VillageChiefPanel() {
   };
   
   return (
-    <div className="fixed top-16 right-4 z-20">
-      {!showPanel ? (
-        <button
-          onClick={() => setShowPanel(true)}
-          className="px-4 py-2 bg-purple-600/90 dark:bg-purple-700/90 text-white rounded-lg shadow-lg hover:bg-purple-500 dark:hover:bg-purple-600 transition-colors"
+    <div className="w-full">
+      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Village Chief Links</h2>
+      
+      <div className="mb-4">
+        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+          Select citizens to link with the Village Chief. If the Village Chief links with a Mafia member, they will be eliminated.
+        </p>
+        
+        {renderLinkedPlayers()}
+        {renderPlayerSelector()}
+      </div>
+      
+      <div className="flex space-x-2">
+        <button 
+          className="flex-1 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500"
         >
-          Village Chief Links
+          Create Link
         </button>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-w-sm w-full">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-              Village Chief Panel
-            </h2>
-            <button
-              onClick={() => setShowPanel(false)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg mb-4">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Link with up to 2 citizens. If you link with a Mafia member, you and all your linked citizens will be eliminated.
-            </p>
-          </div>
-          
-          {renderLinkedPlayers()}
-          {renderPlayerSelector()}
-        </div>
-      )}
+        <button
+          className="flex-1 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+          onClick={() => {
+            // Close panel
+            document.getElementById('village-chief-panel')?.classList.add('hidden');
+          }}
+        >
+          Close
+        </button>
+      </div>
     </div>
   );
 } 
