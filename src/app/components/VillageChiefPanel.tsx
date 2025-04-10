@@ -10,7 +10,6 @@ export default function VillageChiefPanel() {
     addToGameLog
   } = useGameContext();
   
-  const [showPanel, setShowPanel] = useState<boolean>(false);
   const [linkedPlayers, setLinkedPlayers] = useState<string[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   

@@ -7,271 +7,177 @@ export default function PoisonVotePanel() {
   const { 
     gameState, 
     eliminatePlayer,
-    addToGameLog
+    addToGameLog,
   } = useGameContext();
   
-  const [showPanel, setShowPanel] = useState<boolean>(false);
   const [poisonedPlayerId, setPoisonedPlayerId] = useState<string | null>(null);
-  const [votes, setVotes] = useState<{[playerId: string]: 'yes' | 'no' | null}>({});
+  const [votes, setVotes] = useState<{[key: string]: 'yes' | 'no'}>({});
   const [votingComplete, setVotingComplete] = useState<boolean>(false);
   const [showResult, setShowResult] = useState<boolean>(false);
   
-  // Only show for Capo scenario with a poisoned player
+  // Ensure hooks are called unconditionally
+  useEffect(() => {
+    // Determine initial poisoned player if applicable
+    if (gameState && gameState.scenario === 'capo') {
+      // Find the Herbalist - Removing unused variable
+      // const herbalist = gameState.players.find(p => p.role.name === 'Herbalist');
+      // Check if Herbalist poisoned someone (logic depends on how you track this)
+      // For now, we assume we need a way to set poisonedPlayerId initially
+      // E.g., if it's stored in the gameState
+    }
+  }, [gameState]); // Dependency on gameState
+
+  // Only show for Capo scenario with a Herbalist role
   if (!gameState || gameState.scenario !== 'capo') return null;
   
-  // For demo purposes, we'll check for any player that could be poisoned
-  // In a real implementation, we should track the poisoned state in gameState
-  const livingPlayers = gameState.players.filter(p => p.isAlive);
-  
-  // Initialize the poisoned player for demo purposes
-  // In a real implementation, this would come from the game state
-  useEffect(() => {
-    if (livingPlayers.length > 0 && !poisonedPlayerId) {
-      // For demo, we're just setting the first player as poisoned
-      // In a real implementation, the Herbalist would choose
-    }
-  }, [livingPlayers, poisonedPlayerId]);
-  
-  const handleSetPoisonedPlayer = (playerId: string) => {
-    setPoisonedPlayerId(playerId);
-    addToGameLog(`Herbalist poisoned a player. The poison will take effect after this day phase.`);
-    setShowPanel(false);
-  };
+  // Living players excluding Herbalist (assuming Herbalist exists if panel shows)
+  const herbalistId = gameState.players.find(p => p.role.name === 'Herbalist')?.id;
+  const livingVoters = gameState.players.filter(p => p.isAlive && p.id !== herbalistId);
+  const poisonedPlayer = gameState.players.find(p => p.id === poisonedPlayerId);
   
   const handleVote = (voterId: string, vote: 'yes' | 'no') => {
-    setVotes(prev => ({
-      ...prev,
-      [voterId]: vote
-    }));
+    if (votingComplete) return;
+    
+    const newVotes = { ...votes, [voterId]: vote };
+    setVotes(newVotes);
+    
+    // Check if all living players have voted
+    if (Object.keys(newVotes).length === livingVoters.length) {
+      setVotingComplete(true);
+    }
   };
   
-  const countVotes = () => {
-    const yesVotes = Object.values(votes).filter(vote => vote === 'yes').length;
-    const totalVoters = livingPlayers.length - 1; // Excluding poisoned player
-    return {
-      yes: yesVotes,
-      no: totalVoters - yesVotes,
-      total: totalVoters,
-      majority: Math.floor(totalVoters / 2) + 1
-    };
-  };
-  
-  const finalizeVoting = () => {
-    setVotingComplete(true);
+  const handleAntidoteDecision = () => {
+    if (!votingComplete || !poisonedPlayerId) return;
     
-    const { yes, majority } = countVotes();
-    const majorityReached = yes >= majority;
+    const yesVotes = Object.values(votes).filter(v => v === 'yes').length;
+    const noVotes = Object.keys(votes).length - yesVotes;
     
-    if (majorityReached) {
-      addToGameLog(`The town voted to administer the antidote. The Herbalist must now decide.`);
+    const majority = Math.floor(livingVoters.length / 2) + 1;
+    const giveAntidote = yesVotes >= majority;
+    
+    const poisonedPlayerDetails = gameState.players.find(p => p.id === poisonedPlayerId);
+    
+    if (giveAntidote) {
+      addToGameLog(`Majority voted YES (${yesVotes} to ${noVotes}). Antidote given to ${poisonedPlayerDetails?.name}.`);
+      // Logic to remove poisoned status (depends on implementation)
     } else {
-      addToGameLog(`The town voted against administering the antidote.`);
+      addToGameLog(`Majority voted NO (${noVotes} to ${yesVotes}). Antidote denied. ${poisonedPlayerDetails?.name} is eliminated.`);
+      eliminatePlayer(poisonedPlayerId);
     }
     
     setShowResult(true);
   };
-  
-  const handleAntidoteDecision = (giveAntidote: boolean) => {
-    if (!poisonedPlayerId) return;
-    
-    const poisonedPlayer = gameState.players.find(p => p.id === poisonedPlayerId);
-    if (!poisonedPlayer) return;
-    
-    if (giveAntidote) {
-      addToGameLog(`The Herbalist gave the antidote to ${poisonedPlayer.name}, who survived.`);
-    } else {
-      eliminatePlayer(poisonedPlayerId);
-      addToGameLog(`The Herbalist denied the antidote. ${poisonedPlayer.name} died from poison.`);
-    }
-    
-    // Reset the panel state
+
+  const handleReset = () => {
     setPoisonedPlayerId(null);
     setVotes({});
     setVotingComplete(false);
     setShowResult(false);
-    setShowPanel(false);
+    addToGameLog('Poison state has been reset.');
   };
-  
-  const renderPoisonTargetSelector = () => {
-    if (poisonedPlayerId) return null;
-    
-    return (
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">
-          Select Target to Poison
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {livingPlayers.map(player => (
-            <button
-              key={player.id}
-              onClick={() => handleSetPoisonedPlayer(player.id)}
-              className="p-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-            >
-              {player.name}
-            </button>
-          ))}
+
+  const renderContent = () => {
+    if (!poisonedPlayerId) {
+      // Render UI for Herbalist to select a target to poison (if needed here)
+      return (
+        <div className="text-center text-gray-500 dark:text-gray-400">
+          Herbalist needs to select a player to poison.
         </div>
-      </div>
-    );
-  };
-  
-  const renderVotingPanel = () => {
-    if (!poisonedPlayerId || votingComplete) return null;
-    
-    const poisonedPlayer = gameState.players.find(p => p.id === poisonedPlayerId);
-    if (!poisonedPlayer) return null;
-    
-    const { yes, no, total, majority } = countVotes();
-    
-    return (
-      <div className="mb-4">
-        <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg mb-4">
-          <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-1">
-            {poisonedPlayer.name} is Poisoned
+      );
+    }
+
+    if (!votingComplete) {
+      // Render Voting Panel Logic
+      return (
+        <div>
+          <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">
+            Vote on Antidote for {poisonedPlayer?.name}
           </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Vote whether to give the antidote. Majority ({majority} votes) needed.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 gap-2 mb-4">
-          {livingPlayers
-            .filter(p => p.id !== poisonedPlayerId)
-            .map(player => (
-              <div 
-                key={player.id}
-                className="flex items-center p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
-              >
-                <span className="font-medium">{player.name}</span>
-                <div className="ml-auto flex space-x-2">
+          <div className="space-y-2 mb-4">
+            {livingVoters.map(voter => (
+              <div key={voter.id} className="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                <span className="text-gray-800 dark:text-gray-200">{voter.name}</span>
+                <div className="flex space-x-1">
                   <button
-                    onClick={() => handleVote(player.id, 'yes')}
-                    className={`px-3 py-1 rounded-lg ${
-                      votes[player.id] === 'yes' 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
+                    onClick={() => handleVote(voter.id, 'yes')}
+                    disabled={!!votes[voter.id]}
+                    className={`px-2 py-1 text-xs rounded ${votes[voter.id] === 'yes' ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50'}`}
                   >
                     Yes
                   </button>
                   <button
-                    onClick={() => handleVote(player.id, 'no')}
-                    className={`px-3 py-1 rounded-lg ${
-                      votes[player.id] === 'no' 
-                        ? 'bg-red-500 text-white' 
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
+                    onClick={() => handleVote(voter.id, 'no')}
+                    disabled={!!votes[voter.id]}
+                    className={`px-2 py-1 text-xs rounded ${votes[voter.id] === 'no' ? 'bg-red-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50'}`}
                   >
                     No
                   </button>
                 </div>
               </div>
             ))}
-        </div>
-        
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Yes: {yes} | No: {no} | Total: {total}
-          </div>
-          <div>
-            <button
-              onClick={finalizeVoting}
-              disabled={Object.keys(votes).length < total}
-              className={`px-4 py-2 rounded-lg ${
-                Object.keys(votes).length === total
-                  ? 'bg-indigo-600 dark:bg-amber-600 text-white'
-                  : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              Complete Voting
-            </button>
           </div>
         </div>
-      </div>
-    );
-  };
-  
-  const renderAntidoteDecision = () => {
-    if (!poisonedPlayerId || !votingComplete || !showResult) return null;
-    
-    const poisonedPlayer = gameState.players.find(p => p.id === poisonedPlayerId);
-    if (!poisonedPlayer) return null;
-    
-    const { yes, majority } = countVotes();
-    const majorityReached = yes >= majority;
-    
-    if (!majorityReached) {
-      handleAntidoteDecision(false); // Automatically deny if majority not reached
-      return null;
+      );
     }
-    
+
+    if (!showResult) {
+      // Render Antidote Decision Button
+      return (
+        <button
+          onClick={handleAntidoteDecision}
+          className="w-full py-2 bg-indigo-600 dark:bg-amber-600 text-white rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500"
+        >
+          Finalize Antidote Decision
+        </button>
+      );
+    }
+
+    // Show result message after decision
     return (
-      <div className="mb-4">
-        <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg mb-4">
-          <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-1">
-            Herbalist's Decision
-          </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            The town voted to give the antidote to {poisonedPlayer.name}.
-            As the Herbalist, you make the final decision.
-          </p>
-        </div>
-        
-        <div className="flex space-x-2">
-          <button
-            onClick={() => handleAntidoteDecision(true)}
-            className="flex-1 py-3 bg-green-600 text-white rounded-lg"
-          >
-            Give Antidote
-          </button>
-          <button
-            onClick={() => handleAntidoteDecision(false)}
-            className="flex-1 py-3 bg-red-600 text-white rounded-lg"
-          >
-            Deny Antidote
-          </button>
-        </div>
+      <div className="p-3 text-center bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+        <p className="text-blue-800 dark:text-blue-300 font-medium">
+          Voting complete. Check the game log for the outcome.
+        </p>
       </div>
     );
   };
-  
+
   return (
     <div className="w-full">
-      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Poison Controls</h2>
-      
-      {/* Content of Poison Vote Panel */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-          Herbalist has poisoned a player. The village must vote whether to administer the antidote.
-        </p>
-        
-        {/* Poisoned player information */}
-        <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg mb-4">
-          <p className="text-red-800 dark:text-red-300 font-medium">
-            Current poisoned player: {poisonedPlayerId ? gameState.players.find(p => p.id === poisonedPlayerId)?.name : 'None'}
-          </p>
-        </div>
-        
-        {/* Voting controls */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <button className="py-2 bg-green-600 text-white rounded-lg hover:bg-green-500">
-            Give Antidote
-          </button>
-          <button className="py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
-            Deny Antidote
-          </button>
-        </div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Poison Controls</h2>
+        <button
+          onClick={() => document.getElementById('poison-panel')?.classList.add('hidden')}
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
       
-      <button
-        className="w-full py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
-        onClick={() => {
-          // Close panel
-          document.getElementById('poison-panel')?.classList.add('hidden');
-        }}
-      >
-        Close
-      </button>
+      <div className="mb-4">
+        {poisonedPlayer && (
+          <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg mb-4">
+            <p className="text-red-800 dark:text-red-300 font-medium">
+              Currently poisoned: {poisonedPlayer.name}
+            </p>
+          </div>
+        )}
+        
+        {renderContent()}
+
+      </div>
+      
+      {poisonedPlayerId && (
+        <button
+          onClick={handleReset}
+          className="w-full py-2 mt-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+        >
+          Reset Poison State
+        </button>
+      )}
     </div>
   );
 } 

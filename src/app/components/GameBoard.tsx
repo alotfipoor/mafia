@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Player } from '../models/types';
 import { useGameContext } from '../context/GameContext';
+import { useThemeContext } from '../context/ThemeContext';
 import ActionPanel from './ActionPanel';
 import BombDefusalPanel from './BombDefusalPanel';
 import RoleInquiryPanel from './RoleInquiryPanel';
@@ -22,6 +23,8 @@ export default function GameBoard() {
     resetGame
   } = useGameContext();
   
+  const { toggleTheme } = useThemeContext();
+
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [showLog, setShowLog] = useState<boolean>(false);
   const [cityTrustee, setCityTrustee] = useState<string | null>(null);
@@ -421,8 +424,8 @@ export default function GameBoard() {
         </div>
       </div>
 
-      {/* Improved mobile bottom navigation bar - increase z-index */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-3 px-4 z-[999] md:hidden">
+      {/* Mobile bottom navigation bar - Very high z-index */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-3 px-4 z-[5000] md:hidden">
         <div className="flex justify-between items-center">
           <button
             onClick={resetGame}
@@ -477,10 +480,10 @@ export default function GameBoard() {
         </div>
       </div>
       
-      {/* Improved mobile menu popup - positioned higher to avoid overlapping with navbar */}
+      {/* Mobile menu popup - Even higher z-index */}
       <div 
         id="mobile-menu" 
-        className="fixed bottom-20 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[1000] hidden"
+        className="fixed bottom-20 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[5001] hidden"
       >
         <div className="space-y-3">
           {gameState.phase === 'night' && gameState.round > 1 && (
@@ -559,7 +562,7 @@ export default function GameBoard() {
           <button 
             className="flex items-center w-full px-4 py-2 text-left bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
             onClick={() => {
-              document.querySelector('html')?.classList.toggle('dark');
+              toggleTheme();
               document.getElementById('mobile-menu')?.classList.add('hidden');
             }}
           >
@@ -571,63 +574,53 @@ export default function GameBoard() {
         </div>
       </div>
 
-      {/* Hidden container for night actions panel */}
-      <div id="night-actions-panel" className="fixed top-20 right-4 z-[900] hidden">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Night Actions</h2>
-            <button
-              onClick={() => document.getElementById('night-actions-panel')?.classList.add('hidden')}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          {/* Night actions content will be rendered by the NightActionPanel component */}
-        </div>
+      {/* Hidden panels - adjust z-index, lower than nav/menu */}
+      <div id="night-actions-panel" className="fixed top-20 right-4 z-[4000] hidden">
+         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80">
+           <div className="flex justify-between items-center mb-4">
+             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Night Actions</h2>
+             <button
+               onClick={() => document.getElementById('night-actions-panel')?.classList.add('hidden')}
+               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+             >
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+               </svg>
+             </button>
+           </div>
+           
+           {/* Night actions content will be rendered by the NightActionPanel component */}
+         </div>
       </div>
-
-      {/* Timer container - with proper dark mode support */}
-      <div id="timer-container" className={`fixed bottom-20 left-4 z-[900] ${showTimer ? 'block' : 'hidden'}`}>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-64">
-          {/* Timer content will be inserted here by GameTimer component */}
-        </div>
+      <div id="timer-container" className={`fixed bottom-20 left-4 z-[4000] ${showTimer ? 'block' : 'hidden'}`}>
+         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-64">
+           {/* Timer content will be inserted here by GameTimer component */}
+         </div>
       </div>
-
-      {/* Hidden container for Village Chief Panel */}
-      <div id="village-chief-panel" className="fixed top-20 right-4 z-[900] hidden">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
-          <VillageChiefPanel />
-        </div>
+      <div id="village-chief-panel" className="fixed top-20 right-4 z-[4000] hidden">
+         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+           <VillageChiefPanel />
+         </div>
       </div>
-
-      {/* Hidden container for Poison Controls */}
-      <div id="poison-panel" className="fixed top-20 right-4 z-[900] hidden">
+      <div id="poison-panel" className="fixed top-20 right-4 z-[4000] hidden">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
           <PoisonVotePanel />
         </div>
       </div>
-
-      {/* Hidden container for Bomb Defusal */}
-      <div id="bomb-defusal-panel" className="fixed top-20 right-4 z-[900] hidden">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
-          <BombDefusalPanel />
-        </div>
+      <div id="bomb-defusal-panel" className="fixed top-20 right-4 z-[4000] hidden">
+         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+           <BombDefusalPanel />
+         </div>
       </div>
 
-      {/* These components now will use the containers above instead of rendering their own floating UIs */}
+      {/* Render components that manage their own content or insert into containers */} 
       <ActionPanel />
       <GameTimer />
 
-      {/* Remove these since we now have dedicated panels for them */}
-      {/* <BombDefusalPanel /> */}
-      {/* <RoleInquiryPanel /> */}
-      {/* <CapoTrusteePanel /> */}
-      {/* <VillageChiefPanel /> */}
-      {/* <PoisonVotePanel /> */}
+      {/* Ensure other panels like RoleInquiryPanel/CapoTrusteePanel are handled appropriately */}
+      {/* If they also need to be in containers, add them similarly to the above panels */}
+      <RoleInquiryPanel />
+      <CapoTrusteePanel />
     </div>
   );
 } 

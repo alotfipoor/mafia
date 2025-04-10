@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useGameContext } from '../context/GameContext';
 import PlayerTimer from './PlayerTimer';
+import { Player } from '../models/types'; // Import Player type
 
 export default function CapoTrusteePanel() {
   const { 
@@ -13,13 +14,13 @@ export default function CapoTrusteePanel() {
   } = useGameContext();
   
   const [showPanel, setShowPanel] = useState<boolean>(false);
-  const [selectedTrustee, setSelectedTrustee] = useState<string | null>(null);
+  const [selectedTrusteeId, setSelectedTrusteeId] = useState<string | null>(null);
   const [trusteeConfirmed, setTrusteeConfirmed] = useState<boolean>(false);
   const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
   const [firstBulletType, setFirstBulletType] = useState<'blank' | 'real' | null>(null);
   const [timerDuration, setTimerDuration] = useState<40 | 60 | 90>(60);
   const [showTimer, setShowTimer] = useState<boolean>(false);
-  const [activePlayer, setActivePlayer] = useState<string>('');
+  const [activeTimerPlayer, setActiveTimerPlayer] = useState<Player | null>(null); 
   
   // Only show for Capo scenario on day 1
   if (!gameState || gameState.scenario !== 'capo' || gameState.phase !== 'day' || gameState.round !== 1) {
@@ -30,21 +31,28 @@ export default function CapoTrusteePanel() {
   
   const handleTrusteeSelect = (playerId: string) => {
     if (trusteeConfirmed) return;
-    setSelectedTrustee(playerId);
+    setSelectedTrusteeId(playerId);
   };
   
   const confirmTrustee = () => {
-    if (!selectedTrustee) return;
+    if (!selectedTrusteeId) return;
     
-    const trustee = gameState.players.find(p => p.id === selectedTrustee);
+    const trustee = gameState.players.find(p => p.id === selectedTrusteeId);
     if (!trustee) return;
     
     setTrusteeConfirmed(true);
     addToGameLog(`${trustee.name} was selected as City Trustee.`);
     
-    // Start trustee timer
-    setActivePlayer(trustee.name);
+    // Start trustee timer with the correct player object
+    setActiveTimerPlayer(trustee);
     setShowTimer(true);
+  };
+  
+  const handleTimerEnd = (playerId: string) => {
+    console.log(`Timer ended for player ${playerId}`);
+    setShowTimer(false);
+    setActiveTimerPlayer(null);
+    // Add any other logic needed when the timer ends
   };
   
   const handleTargetSelect = (playerId: string) => {
@@ -96,7 +104,7 @@ export default function CapoTrusteePanel() {
   };
   
   const resetPanel = () => {
-    setSelectedTrustee(null);
+    setSelectedTrusteeId(null);
     setTrusteeConfirmed(false);
     setSelectedTargets([]);
     setFirstBulletType(null);
@@ -106,12 +114,15 @@ export default function CapoTrusteePanel() {
   
   return (
     <>
-      <PlayerTimer 
-        duration={timerDuration} 
-        isActive={showTimer} 
-        playerName={activePlayer}
-        onComplete={() => setShowTimer(false)}
-      />
+      {showTimer && activeTimerPlayer && (
+        <PlayerTimer 
+          key={activeTimerPlayer.id}
+          player={activeTimerPlayer}
+          initialTime={timerDuration}
+          onTimerEnd={handleTimerEnd}
+          isCurrentTurn={true}
+        />
+      )}
       
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-20">
         {!showPanel ? (
@@ -157,7 +168,7 @@ export default function CapoTrusteePanel() {
                 <button
                   onClick={() => {
                     setShowTimer(true);
-                    setActivePlayer('Current Speaker');
+                    setActiveTimerPlayer(livingPlayers[0]);
                   }}
                   className="flex-1 py-2 bg-green-600 text-white rounded-lg"
                 >
@@ -182,7 +193,7 @@ export default function CapoTrusteePanel() {
                       key={player.id}
                       onClick={() => handleTrusteeSelect(player.id)}
                       className={`p-2 text-sm rounded-lg ${
-                        selectedTrustee === player.id 
+                        selectedTrusteeId === player.id 
                           ? 'bg-purple-500 text-white' 
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                       }`}
@@ -193,9 +204,9 @@ export default function CapoTrusteePanel() {
                 </div>
                 <button
                   onClick={confirmTrustee}
-                  disabled={!selectedTrustee}
+                  disabled={!selectedTrusteeId}
                   className={`w-full py-2 rounded-lg ${
-                    selectedTrustee
+                    selectedTrusteeId
                       ? 'bg-indigo-600 dark:bg-amber-600 text-white' 
                       : 'bg-gray-300 dark:bg-gray-600 text-gray-400 cursor-not-allowed'
                   }`}
@@ -213,7 +224,7 @@ export default function CapoTrusteePanel() {
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {livingPlayers
-                    .filter(p => p.id !== selectedTrustee && !selectedTargets.includes(p.id))
+                    .filter(p => p.id !== selectedTrusteeId && !selectedTargets.includes(p.id))
                     .map(player => (
                       <button
                         key={player.id}

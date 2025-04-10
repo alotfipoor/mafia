@@ -1,37 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export default function GameTimer() {
   const [time, setTime] = useState<number>(60);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [timerDuration, setTimerDuration] = useState<number>(60);
   
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isRunning && time > 0) {
-      interval = setInterval(() => {
-        setTime(prevTime => prevTime - 1);
-      }, 1000);
-    } else if (time === 0) {
-      setIsRunning(false);
-    }
-    
-    return () => clearInterval(interval);
-  }, [isRunning, time]);
-  
-  const handleStart = () => {
+  // Memoize handle functions to use in useEffect dependencies
+  const handleReset = useCallback(() => {
+    setTime(timerDuration);
+    setIsRunning(false);
+  }, [timerDuration]);
+
+  const handleStart = useCallback(() => {
     setTime(timerDuration);
     setIsRunning(true);
-  };
-  
+  }, [timerDuration]);
+
   const handleStop = () => {
-    setIsRunning(false);
-  };
-  
-  const handleReset = () => {
-    setTime(timerDuration);
     setIsRunning(false);
   };
   
@@ -41,7 +28,7 @@ export default function GameTimer() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
   
-  // Find the timer container element
+  // Find the timer container element and render/update timer
   useEffect(() => {
     const timerContainer = document.getElementById('timer-container');
     if (timerContainer) {
@@ -145,19 +132,9 @@ export default function GameTimer() {
         // Initial render
         renderTimer();
         
-        // Re-render when state changes
-        const stateChangeHandler = () => renderTimer();
-        
-        // Set up listeners for state changes
-        const timerStateChanges = [isRunning, time, timerDuration];
-        timerStateChanges.forEach(state => {
-          // This is a hacky way to re-render when state changes
-          // In a real app, we'd use a proper rendering approach
-          setTimeout(stateChangeHandler, 0);
-        });
       }
     }
-  }, [isRunning, time, timerDuration]);
+  }, [isRunning, time, timerDuration, handleStart, handleReset]); // Added handleStart and handleReset to dependencies
   
   // This component doesn't render anything directly
   // It just manipulates the DOM of the timer container

@@ -10,7 +10,6 @@ export default function CapoNightActionPanel() {
     eliminatePlayer,
     savePlayerRole,
     addToGameLog,
-    revealPlayerRole
   } = useGameContext();
   
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
