@@ -22,7 +22,7 @@ export default function SetupPage() {
 
   const handlePlayerSubmit = (playerNames: string[]) => {
     startGame(playerNames, selectedScenario);
-    router.push('/'); // Redirect to home page after starting game
+    router.replace('/'); // Use replace instead of push to avoid URL history stacking
   };
 
   const handleBack = () => {

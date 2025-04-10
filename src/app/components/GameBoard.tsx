@@ -3,6 +3,13 @@
 import { useEffect, useState } from 'react';
 import { Player } from '../models/types';
 import { useGameContext } from '../context/GameContext';
+import ActionPanel from './ActionPanel';
+import BombDefusalPanel from './BombDefusalPanel';
+import RoleInquiryPanel from './RoleInquiryPanel';
+import CapoTrusteePanel from './CapoTrusteePanel';
+import GameTimer from './GameTimer';
+import PoisonVotePanel from './PoisonVotePanel';
+import VillageChiefPanel from './VillageChiefPanel';
 
 export default function GameBoard() {
   const { 
@@ -43,41 +50,59 @@ export default function GameBoard() {
       case 'night':
         // Night actions depend on the player&apos;s role
         if (gameState.scenario === 'classic') {
-          if (gameState.players.find(p => p.id === selectedPlayer)?.role.name === 'Doctor') {
+          const targetPlayer = gameState.players.find(p => p.id === selectedPlayer);
+          if (!targetPlayer) return;
+          
+          if (gameState.round === 1) {
+            // First night is just for mafia to know each other
+            addToGameLog(`First night - no actions are performed.`);
+          } else if (gameState.players.find(p => p.id === selectedPlayer)?.role.name === 'Doctor') {
             savePlayerRole(selectedPlayer);
-            addToGameLog(`Doctor attempted to save a player.`);
+            addToGameLog(`Doctor attempted to save ${targetPlayer.name}.`);
           } else {
             eliminatePlayer(selectedPlayer);
-            addToGameLog(`Mafia chose a target.`);
+            addToGameLog(`Mafia chose to eliminate ${targetPlayer.name}.`);
           }
         } else {
           // For Capo scenario
           const targetPlayer = gameState.players.find(p => p.id === selectedPlayer);
-          const roleName = targetPlayer?.role.name;
+          if (!targetPlayer) return;
           
-          if (roleName === 'Blacksmith') {
+          if (gameState.round === 1) {
+            // First night is just for mafia to know each other
+            addToGameLog(`First night - no actions are performed.`);
+          } else if (targetPlayer.role.name === 'Blacksmith') {
             savePlayerRole(selectedPlayer);
-            addToGameLog(`Blacksmith attempted to save a player.`);
-          } else if (roleName === 'Detective') {
-            const isNegative = targetPlayer?.role.name === 'Don Mafia';
-            addToGameLog(`Detective investigated a player. Result: ${isNegative ? 'Negative' : 'Positive'}`);
-          } else if (roleName === 'Herbalist') {
-            addToGameLog(`Herbalist attempted to poison a player.`);
-          } else if (targetPlayer?.role.team === 'mafia') {
+            addToGameLog(`Blacksmith attempted to save ${targetPlayer.name}.`);
+          } else if (targetPlayer.role.name === 'Detective') {
+            // Find the target of the detective's investigation (currently selected player)
+            const investigationTarget = gameState.players.find(p => p.id === selectedPlayer);
+            // Don Mafia always gives negative result, as do all non-mafia roles
+            const isNegative = investigationTarget?.role.name === 'Don Mafia' || investigationTarget?.role.team !== 'mafia';
+            addToGameLog(`Detective investigated ${targetPlayer.name}. Result: ${isNegative ? 'Negative' : 'Positive'}`);
+          } else if (targetPlayer.role.name === 'Herbalist') {
+            addToGameLog(`Herbalist attempted to poison ${targetPlayer.name}.`);
+          } else if (targetPlayer.role.team === 'mafia') {
             eliminatePlayer(selectedPlayer);
-            addToGameLog(`Mafia chose to eliminate a player.`);
+            addToGameLog(`Mafia chose to eliminate ${targetPlayer.name}.`);
           }
         }
         break;
       
       case 'day':
         // Regular day action
+        const targetPlayer = gameState.players.find(p => p.id === selectedPlayer);
+        if (!targetPlayer) return;
+        
         revealPlayerRole(selectedPlayer);
         break;
       
       case 'voting':
+        const votedPlayer = gameState.players.find(p => p.id === selectedPlayer);
+        if (!votedPlayer) return;
+        
         eliminatePlayer(selectedPlayer);
-        addToGameLog(`The village voted to eliminate a player.`);
+        addToGameLog(`The village voted to eliminate ${votedPlayer.name}.`);
         break;
     }
     
@@ -143,8 +168,8 @@ export default function GameBoard() {
 
   const getPhaseDisplay = () => {
     switch (gameState.phase) {
-      case 'setup': return 'Setup';
-      case 'night': return 'Night Phase';
+      case 'setup': return 'Introduction Round';
+      case 'night': return gameState.round === 1 ? 'First Night (Mafia Only)' : 'Night Phase';
       case 'day': return 'Day Phase';
       case 'voting': return 'Voting Phase';
       case 'results': return 'Results Phase';
@@ -402,6 +427,27 @@ export default function GameBoard() {
           </div>
         </div>
       </div>
+
+      {/* Add the ActionPanel */}
+      <ActionPanel />
+      
+      {/* Add the BombDefusalPanel */}
+      <BombDefusalPanel />
+      
+      {/* Add the RoleInquiryPanel */}
+      <RoleInquiryPanel />
+      
+      {/* Add the CapoTrusteePanel */}
+      <CapoTrusteePanel />
+      
+      {/* Add the PoisonVotePanel */}
+      <PoisonVotePanel />
+      
+      {/* Add the VillageChiefPanel */}
+      <VillageChiefPanel />
+      
+      {/* Add the GameTimer */}
+      <GameTimer />
     </div>
   );
 } 

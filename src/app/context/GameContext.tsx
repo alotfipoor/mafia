@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { GameState, ScenarioType } from '../models/types';
 import { createNewGame, loadGame, saveGame } from '../utils/gameUtils';
+import { useRouter } from 'next/navigation';
 
 interface GameContextType {
   gameState: GameState | null;
@@ -38,6 +39,7 @@ export const useGameContext = () => {
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [gameState, setGameState] = useState<GameState | null>(null);
+  const router = useRouter();
 
   // Try to load a saved game on initial mount
   useEffect(() => {
@@ -68,10 +70,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('mafiaGameState');
     }
     
-    // Force a reload to ensure the UI is reset
-    if (typeof window !== 'undefined') {
-      window.location.href = window.location.pathname;
-    }
+    // Use router.replace to reset URL without adding to history
+    router.replace('/');
   };
 
   const advancePhase = () => {
