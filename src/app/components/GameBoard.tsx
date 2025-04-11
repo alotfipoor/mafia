@@ -52,9 +52,19 @@ export default function GameBoard() {
     setShowMobileCapoActions(prev => !prev);
   };
   
+  // Add dedicated close function for Capo panel
+  const closeMobileCapoPanel = () => {
+    setShowMobileCapoActions(false);
+  };
+
   const toggleMobileZodiacActions = () => {
     closeMobilePanels();
     setShowMobileZodiacActions(prev => !prev);
+  };
+  
+  // Add dedicated close function for Zodiac panel
+  const closeMobileZodiacPanel = () => {
+    setShowMobileZodiacActions(false);
   };
   
   const toggleMobileRoleCheck = () => {
@@ -666,9 +676,9 @@ export default function GameBoard() {
       {/* Render components: Pass visibility state and close handler to relevant panels */}
       <ActionPanel 
         isMobileCapoVisible={showMobileCapoActions}
-        closeMobileCapoPanel={toggleMobileCapoActions}
+        closeMobileCapoPanel={closeMobileCapoPanel}
         isMobileZodiacVisible={showMobileZodiacActions}
-        closeMobileZodiacPanel={toggleMobileZodiacActions}
+        closeMobileZodiacPanel={closeMobileZodiacPanel}
       />
       <GameTimer />
       <RoleInquiryPanel isMobileVisible={showMobileRoleCheck} closeMobilePanel={toggleMobileRoleCheck} />
