@@ -5,7 +5,12 @@ import { createPortal } from 'react-dom';
 import { Player } from '../models/types';
 import { useGameContext } from '../context/GameContext';
 
-export default function CapoNightActionPanel() {
+interface CapoNightActionPanelProps {
+  isMobileVisible: boolean;
+  closeMobilePanel: () => void;
+}
+
+export default function CapoNightActionPanel({ isMobileVisible, closeMobilePanel }: CapoNightActionPanelProps) {
   const { 
     gameState, 
     eliminatePlayer,
@@ -15,7 +20,7 @@ export default function CapoNightActionPanel() {
   
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
-  const [showPanel, setShowPanel] = useState<boolean>(false);
+  const [showDesktopPanel, setShowDesktopPanel] = useState<boolean>(false);
   const [roleGuess, setRoleGuess] = useState<string>('');
   const [showPoisonVoting, setShowPoisonVoting] = useState<boolean>(false);
   const [poisonedPlayerId, setPoisonedPlayerId] = useState<string | null>(null);
@@ -32,7 +37,7 @@ export default function CapoNightActionPanel() {
     
     const handleVisibilityChange = () => {
       if (panelContainer) {
-        setShowPanel(!panelContainer.classList.contains('hidden'));
+        setShowDesktopPanel(!panelContainer.classList.contains('hidden'));
       }
     };
     
@@ -55,13 +60,17 @@ export default function CapoNightActionPanel() {
     }
   }, []);
   
-  // Handle panel close - also update the hidden class for mobile menu toggling
-  const handleClosePanel = () => {
-    setShowPanel(false);
-    const panelContainer = document.getElementById('capo-night-actions-panel-container');
-    if (panelContainer) {
-      panelContainer.classList.add('hidden');
-    }
+  // Use the prop for mobile visibility
+  const showMobilePanel = isMobileVisible;
+
+  // Handle closing desktop panel
+  const handleCloseDesktopPanel = () => {
+    setShowDesktopPanel(false);
+  };
+  
+  // Use the passed function to close the mobile panel
+  const handleCloseMobilePanel = () => {
+    closeMobilePanel();
   };
 
   if (!gameState || gameState.phase !== 'night' || gameState.scenario !== 'capo') return null;
@@ -210,7 +219,7 @@ export default function CapoNightActionPanel() {
     setRoleGuess('');
     
     // Close panel after action
-    handleClosePanel();
+    handleCloseDesktopPanel();
   };
   
   const getWizardActionText = (targetPlayer: Player): string => {
@@ -445,7 +454,7 @@ export default function CapoNightActionPanel() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Capo Night Actions</h2>
         <button
-          onClick={handleClosePanel}
+          onClick={showDesktopPanel ? handleCloseDesktopPanel : handleCloseMobilePanel}
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -483,7 +492,7 @@ export default function CapoNightActionPanel() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Capo Actions</h2>
         <button
-          onClick={handleClosePanel}
+          onClick={handleCloseMobilePanel}
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -519,9 +528,9 @@ export default function CapoNightActionPanel() {
     <>
       {/* Panel for desktop view (fixed position) */}
       <div className="fixed bottom-4 right-4 z-10 hidden md:block">
-        {!showPanel ? (
+        {!showDesktopPanel ? (
           <button
-            onClick={() => setShowPanel(true)}
+            onClick={() => setShowDesktopPanel(true)}
             className="px-4 py-2 bg-indigo-600/90 dark:bg-amber-600/90 text-white rounded-lg shadow-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors"
           >
             Show Capo Actions
@@ -532,7 +541,7 @@ export default function CapoNightActionPanel() {
       </div>
       
       {/* Mobile panel portal: Render content into the container div in GameBoard if the panel should be shown */}
-      {isMounted && showPanel && document.getElementById('capo-night-actions-panel-container')
+      {isMounted && showMobilePanel && document.getElementById('capo-night-actions-panel-container')
         ? createPortal(
             mobilePanelContent,
             document.getElementById('capo-night-actions-panel-container')!

@@ -5,35 +5,40 @@ import NightActionPanel from './NightActionPanel';
 import CapoNightActionPanel from './CapoNightActionPanel';
 import ZodiacNightActionPanel from './ZodiacNightActionPanel';
 
-export default function ActionPanel() {
+interface ActionPanelProps {
+  isMobileCapoVisible: boolean;
+  closeMobileCapoPanel: () => void;
+  isMobileZodiacVisible: boolean;
+  closeMobileZodiacPanel: () => void;
+}
+
+export default function ActionPanel({ 
+  isMobileCapoVisible, 
+  closeMobileCapoPanel, 
+  isMobileZodiacVisible, 
+  closeMobileZodiacPanel 
+}: ActionPanelProps) {
   const { gameState } = useGameContext();
   
   if (!gameState) return null;
   
   // Only show action panels during night phase
-  if (gameState.phase !== 'night' && gameState.phase !== 'day') return null;
+  if (gameState.phase !== 'night') return null; // Simplified condition
   
-  // Render the appropriate panel based on scenario and phase
-  if (gameState.phase === 'night') {
-    switch (gameState.scenario) {
-      case 'zodiac':
-        return <ZodiacNightActionPanel />;
-      case 'capo':
-        return <CapoNightActionPanel />;
-      case 'classic':
-        // Use the generic NightActionPanel for classic scenario
-        return <NightActionPanel />;
-      case 'jack':
-        // Could add a jack panel in the future
-        return null;
-      default:
-        // Default to NightActionPanel for any undefined scenario
-        return <NightActionPanel />;
-    }
-  } else if (gameState.phase === 'day') {
-    // Day phase panels could be added here in the future
-    return null;
+  // Render the appropriate panel based on scenario
+  switch (gameState.scenario) {
+    case 'zodiac':
+      return <ZodiacNightActionPanel isMobileVisible={isMobileZodiacVisible} closeMobilePanel={closeMobileZodiacPanel} />;
+    case 'capo':
+      return <CapoNightActionPanel isMobileVisible={isMobileCapoVisible} closeMobilePanel={closeMobileCapoPanel} />;
+    case 'classic':
+      // Generic panel doesn't need mobile props currently
+      return <NightActionPanel />;
+    case 'jack':
+      // Could add a jack panel in the future
+      return null;
+    default:
+      // Default to NightActionPanel for any undefined scenario
+      return <NightActionPanel />;
   }
-  
-  return null;
 } 

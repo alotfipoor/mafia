@@ -20,7 +20,8 @@ export default function GameBoard() {
     savePlayerRole,
     revealPlayerRole,
     addToGameLog,
-    resetGame
+    resetGame,
+    checkGameStatus
   } = useGameContext();
   
   const { toggleTheme } = useThemeContext();
@@ -33,9 +34,38 @@ export default function GameBoard() {
   const [firstBullet, setFirstBullet] = useState<'blank' | 'live' | null>(null);
   const [showTimer, setShowTimer] = useState<boolean>(false);
   
-  // Reset selected player when phase changes
+  // State for mobile panel visibility
+  const [showMobileCapoActions, setShowMobileCapoActions] = useState(false);
+  const [showMobileZodiacActions, setShowMobileZodiacActions] = useState(false);
+  const [showMobileRoleCheck, setShowMobileRoleCheck] = useState(false);
+  
+  // Function to close all mobile panels (useful when opening one)
+  const closeMobilePanels = () => {
+    setShowMobileCapoActions(false);
+    setShowMobileZodiacActions(false);
+    setShowMobileRoleCheck(false);
+    document.getElementById('mobile-menu')?.classList.add('hidden');
+  };
+
+  const toggleMobileCapoActions = () => {
+    closeMobilePanels();
+    setShowMobileCapoActions(prev => !prev);
+  };
+  
+  const toggleMobileZodiacActions = () => {
+    closeMobilePanels();
+    setShowMobileZodiacActions(prev => !prev);
+  };
+  
+  const toggleMobileRoleCheck = () => {
+    closeMobilePanels();
+    setShowMobileRoleCheck(prev => !prev);
+  };
+  
+  // Reset selected player and mobile panels when phase changes
   useEffect(() => {
     setSelectedPlayer(null);
+    closeMobilePanels(); // Close panels on phase change
     
     // Set Capo controls to show at the end of first day
     if (gameState?.scenario === 'capo' && gameState.phase === 'day' && gameState.round === 1) {
@@ -192,18 +222,6 @@ export default function GameBoard() {
     }
   };
 
-  // Commenting out unused function
-  /* 
-  const getPlayerStatus = (player: Player) => {
-    if (!player.isAlive) return 'Eliminated';
-    if (capoTargets.includes(player.id)) return 'Target';
-    if (player.id === cityTrustee) return 'Trustee';
-    if (player.isSaved) return 'Saved';
-    if (player.isRevealed) return player.role.name;
-    return 'Active';
-  };
-  */
-
   const getPlayerStatusClass = (player: Player) => {
     if (!player.isAlive) return 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300';
     if (capoTargets.includes(player.id)) return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100';
@@ -213,22 +231,6 @@ export default function GameBoard() {
     return player.role.team === 'mafia' 
       ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100' 
       : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100';
-  };
-
-  // Check if any team has won
-  const checkGameStatus = () => {
-    const alivePlayers = gameState.players.filter(p => p.isAlive);
-    const aliveMafia = alivePlayers.filter(p => p.role.team === 'mafia');
-    
-    if (aliveMafia.length === 0) {
-      return 'Citizens Win!';
-    }
-    
-    if (aliveMafia.length >= alivePlayers.length / 2) {
-      return 'Mafia Wins!';
-    }
-    
-    return null;
   };
 
   const gameStatus = checkGameStatus();
@@ -260,7 +262,8 @@ export default function GameBoard() {
           </button>
           <button
             onClick={() => advancePhase()}
-            className="px-4 py-2 bg-indigo-600 dark:bg-amber-600 text-white rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors backdrop-blur-sm shadow-sm"
+            disabled={!!gameStatus}
+            className={`px-4 py-2 bg-indigo-600 dark:bg-amber-600 text-white rounded-lg transition-colors backdrop-blur-sm shadow-sm ${gameStatus ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-500 dark:hover:bg-amber-500'}`}
           >
             Next Phase
           </button>
@@ -270,7 +273,7 @@ export default function GameBoard() {
       {/* Game status banner */}
       {gameStatus && (
         <div className="mb-6 p-4 bg-indigo-100/90 dark:bg-amber-800/90 text-indigo-800 dark:text-gray-100 rounded-lg font-bold text-center text-xl shadow-md backdrop-blur-sm">
-          {gameStatus}
+          Game Over: {gameStatus}
         </div>
       )}
 
@@ -392,7 +395,8 @@ export default function GameBoard() {
             <div className="flex flex-col space-y-3">
               <button
                 onClick={advancePhase}
-                className="w-full py-3 px-4 bg-indigo-600 dark:bg-amber-600 text-white rounded-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors focus:outline-none shadow-sm"
+                disabled={!!gameStatus}
+                className={`w-full py-3 px-4 bg-indigo-600 dark:bg-amber-600 text-white rounded-lg transition-colors focus:outline-none shadow-sm ${gameStatus ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-500 dark:hover:bg-amber-500'}`}
               >
                 Next Phase
               </button>
@@ -459,7 +463,8 @@ export default function GameBoard() {
 
           <button
             onClick={advancePhase}
-            className="flex flex-col items-center text-indigo-600 dark:text-amber-500"
+            disabled={!!gameStatus}
+            className={`flex flex-col items-center text-indigo-600 dark:text-amber-500 ${gameStatus ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -505,11 +510,7 @@ export default function GameBoard() {
             <>
               <button 
                 className="flex items-center w-full px-4 py-2 text-left bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg"
-                onClick={() => {
-                  // Toggle the capo night actions panel container
-                  document.getElementById('capo-night-actions-panel-container')?.classList.toggle('hidden');
-                  document.getElementById('mobile-menu')?.classList.add('hidden');
-                }}
+                onClick={toggleMobileCapoActions}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -562,11 +563,7 @@ export default function GameBoard() {
             <>
               <button 
                 className="flex items-center w-full px-4 py-2 text-left bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg"
-                onClick={() => {
-                  // Toggle the zodiac runner actions panel container
-                  document.getElementById('zodiac-night-actions-panel-container')?.classList.toggle('hidden');
-                  document.getElementById('mobile-menu')?.classList.add('hidden');
-                }}
+                onClick={toggleMobileZodiacActions}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -590,11 +587,7 @@ export default function GameBoard() {
               {gameState.zodiacScenario && gameState.zodiacScenario.roleInquiriesLeft > 0 && (
                 <button 
                   className="flex items-center w-full px-4 py-2 text-left bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg"
-                  onClick={() => {
-                    // Toggle the role check panel container
-                    document.getElementById('role-check-panel-container')?.classList.toggle('hidden');
-                    document.getElementById('mobile-menu')?.classList.add('hidden');
-                  }}
+                  onClick={toggleMobileRoleCheck}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -659,26 +652,27 @@ export default function GameBoard() {
          </div>
       </div>
       
-      <div id="role-check-panel-container" className="fixed top-20 right-4 z-[4000] hidden bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+      {/* Mobile Portal Containers */}
+      <div id="role-check-panel-container" className={`fixed top-20 right-4 z-[4000] ${showMobileRoleCheck ? 'block' : 'hidden'} bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto`}>
          {/* Role check panel content will be portal'd here */}
       </div>
-      
-      <div id="capo-night-actions-panel-container" className="fixed top-20 right-4 z-[4000] hidden bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+      <div id="capo-night-actions-panel-container" className={`fixed top-20 right-4 z-[4000] ${showMobileCapoActions ? 'block' : 'hidden'} bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto`}>
          {/* Capo night actions panel content will be portal'd here */}
       </div>
-
-      {/* Render components that manage their own content or insert into containers */} 
-      <ActionPanel />
-      <GameTimer />
-
-      {/* Ensure other panels like RoleInquiryPanel/CapoTrusteePanel are handled appropriately */}
-      <RoleInquiryPanel />
-      <CapoTrusteePanel />
-
-      {/* New panels for Zodiac scenario */}
-      <div id="zodiac-night-actions-panel-container" className="fixed top-20 right-4 z-[4000] hidden bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+      <div id="zodiac-night-actions-panel-container" className={`fixed top-20 right-4 z-[4000] ${showMobileZodiacActions ? 'block' : 'hidden'} bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto`}>
          {/* Zodiac night actions panel content will be portal'd here */}
       </div>
+
+      {/* Render components: Pass visibility state and close handler to relevant panels */}
+      <ActionPanel 
+        isMobileCapoVisible={showMobileCapoActions}
+        closeMobileCapoPanel={toggleMobileCapoActions}
+        isMobileZodiacVisible={showMobileZodiacActions}
+        closeMobileZodiacPanel={toggleMobileZodiacActions}
+      />
+      <GameTimer />
+      <RoleInquiryPanel isMobileVisible={showMobileRoleCheck} closeMobilePanel={toggleMobileRoleCheck} />
+      <CapoTrusteePanel />
     </div>
   );
 } 

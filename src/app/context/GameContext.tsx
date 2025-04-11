@@ -14,6 +14,7 @@ interface GameContextType {
   savePlayerRole: (playerId: string) => void;
   revealPlayerRole: (playerId: string) => void;
   addToGameLog: (entry: string) => void;
+  checkGameStatus: () => string | null;
   
   // Zodiac scenario methods
   blockPlayerAbility: (playerId: string) => void;
@@ -401,6 +402,32 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       gameLog: [...gameState.gameLog, logEntry],
     });
   };
+
+  // Updated checkGameStatus to use gameState from context
+  const checkGameStatusInternal = (): string | null => {
+    if (!gameState) return null; // No game state, no status
+    
+    const alivePlayers = gameState.players.filter(p => p.isAlive);
+    const aliveMafia = alivePlayers.filter(p => p.role.team === 'mafia');
+    const aliveNonMafia = alivePlayers.filter(p => p.role.team !== 'mafia'); // Includes citizens and independents
+
+    if (aliveMafia.length === 0) {
+      return 'Citizens Win!'; // Or Town Wins!
+    }
+    
+    if (aliveMafia.length >= aliveNonMafia.length) {
+      return 'Mafia Wins!';
+    }
+    
+    // Add checks for independent wins if necessary (e.g., Zodiac, Jack Sparrow)
+    // Example for Zodiac:
+    // const aliveZodiac = alivePlayers.find(p => p.role.name === 'Zodiac');
+    // if (alivePlayers.length === 1 && aliveZodiac) {
+    //   return 'Zodiac Wins!';
+    // }
+    
+    return null; // Game continues
+  };
   
   return (
     <GameContext.Provider
@@ -413,6 +440,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         savePlayerRole,
         revealPlayerRole,
         addToGameLog,
+        checkGameStatus: checkGameStatusInternal,
         blockPlayerAbility,
         placeBomb,
         attemptDefuseBomb,

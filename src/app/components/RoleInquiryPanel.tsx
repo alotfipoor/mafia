@@ -4,53 +4,33 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useGameContext } from '../context/GameContext';
 
-export default function RoleInquiryPanel() {
+interface RoleInquiryPanelProps {
+  isMobileVisible: boolean;
+  closeMobilePanel: () => void;
+}
+
+export default function RoleInquiryPanel({ isMobileVisible, closeMobilePanel }: RoleInquiryPanelProps) {
   const { gameState, checkPlayerRole, revealPlayerRole, addToGameLog } = useGameContext();
   
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
-  const [showPanel, setShowPanel] = useState<boolean>(false);
+  const [showDesktopPanel, setShowDesktopPanel] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
   
-  // Effect to handle the visibility toggle from the mobile menu
-  useEffect(() => {
-    const panelContainer = document.getElementById('role-check-panel-container');
-    
-    const handleVisibilityChange = () => {
-      if (panelContainer) {
-        setShowPanel(!panelContainer.classList.contains('hidden'));
-      }
-    };
+  // Use the prop for mobile visibility
+  const showMobilePanel = isMobileVisible;
 
-    // Initial check
-    handleVisibilityChange();
-    
-    // Add event listener for class changes
-    if (panelContainer) {
-      const observer = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-          if (mutation.attributeName === 'class') {
-            handleVisibilityChange();
-          }
-        });
-      });
-      
-      observer.observe(panelContainer, { attributes: true });
-      
-      return () => observer.disconnect();
-    }
-  }, []);
-  
-  // Handle panel close - also update the hidden class for mobile menu toggling
-  const handleClosePanel = () => {
-    setShowPanel(false);
-    const panelContainer = document.getElementById('role-check-panel-container');
-    if (panelContainer) {
-      panelContainer.classList.add('hidden');
-    }
+  // Handle closing desktop panel
+  const handleCloseDesktopPanel = () => {
+    setShowDesktopPanel(false);
+  };
+
+  // Use the passed function to close the mobile panel (which toggles state in GameBoard)
+  const handleCloseMobilePanel = () => {
+    closeMobilePanel(); 
   };
   
   // Only show for Zodiac scenario with inquiries remaining
@@ -81,8 +61,12 @@ export default function RoleInquiryPanel() {
     
     addToGameLog(`${player.name}'s role (${player.role.name}) was revealed by role check. ${gameState.zodiacScenario!.roleInquiriesLeft - 1} checks remaining.`);
     
-    // Close panel after action
-    handleClosePanel();
+    // Close appropriate panel after action
+    if (showDesktopPanel) {
+      handleCloseDesktopPanel();
+    } else {
+      handleCloseMobilePanel();
+    }
     setSelectedPlayer(null);
   };
   
@@ -91,7 +75,7 @@ export default function RoleInquiryPanel() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-purple-600 dark:text-purple-400">Check Eliminated Roles</h2>
         <button
-          onClick={handleClosePanel}
+          onClick={showDesktopPanel ? handleCloseDesktopPanel : handleCloseMobilePanel}
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,9 +136,9 @@ export default function RoleInquiryPanel() {
     <>
       {/* Panel for desktop view (fixed position) */}
       <div className="fixed top-4 right-4 z-10 md:block hidden">
-        {!showPanel ? (
+        {!showDesktopPanel ? (
           <button
-            onClick={() => setShowPanel(true)}
+            onClick={() => setShowDesktopPanel(true)}
             className="px-4 py-2 bg-purple-600/90 text-white rounded-lg shadow-lg hover:bg-purple-500 transition-colors"
           >
             Check Roles ({gameState.zodiacScenario.roleInquiriesLeft})
@@ -165,7 +149,7 @@ export default function RoleInquiryPanel() {
       </div>
       
       {/* Mobile panel portal: Render content into the container div in GameBoard if the panel should be shown */}
-      {isMounted && showPanel && document.getElementById('role-check-panel-container')
+      {isMounted && showMobilePanel && document.getElementById('role-check-panel-container')
         ? createPortal(
             panelContent, // Re-use the same content for mobile
             document.getElementById('role-check-panel-container')!

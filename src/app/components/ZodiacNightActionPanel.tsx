@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Player } from '../models/types';
 import { useGameContext } from '../context/GameContext';
 
-export default function ZodiacNightActionPanel() {
+interface ZodiacNightActionPanelProps {
+  isMobileVisible: boolean;
+  closeMobilePanel: () => void;
+}
+
+export default function ZodiacNightActionPanel({ isMobileVisible, closeMobilePanel }: ZodiacNightActionPanelProps) {
   const { 
     gameState, 
     eliminatePlayer,
@@ -18,7 +22,7 @@ export default function ZodiacNightActionPanel() {
   
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
-  const [showPanel, setShowPanel] = useState<boolean>(false);
+  const [showDesktopPanel, setShowDesktopPanel] = useState<boolean>(false);
   const [bombCode, setBombCode] = useState<number>(Math.floor(Math.random() * 10000));
   const [isMounted, setIsMounted] = useState(false);
 
@@ -32,7 +36,7 @@ export default function ZodiacNightActionPanel() {
     
     const handleVisibilityChange = () => {
       if (panelContainer) {
-        setShowPanel(!panelContainer.classList.contains('hidden'));
+        setShowDesktopPanel(!panelContainer.classList.contains('hidden'));
       }
     };
     
@@ -55,13 +59,17 @@ export default function ZodiacNightActionPanel() {
     }
   }, []);
   
-  // Handle panel close - also update the hidden class for mobile menu toggling
-  const handleClosePanel = () => {
-    setShowPanel(false);
-    const panelContainer = document.getElementById('zodiac-night-actions-panel-container');
-    if (panelContainer) {
-      panelContainer.classList.add('hidden');
-    }
+  // Use the prop for mobile visibility
+  const showMobilePanel = isMobileVisible;
+
+  // Handle closing desktop panel
+  const handleCloseDesktopPanel = () => {
+    setShowDesktopPanel(false);
+  };
+  
+  // Use the passed function to close the mobile panel
+  const handleCloseMobilePanel = () => {
+    closeMobilePanel();
   };
   
   if (!gameState || gameState.phase !== 'night' || gameState.scenario !== 'zodiac') return null;
@@ -140,7 +148,7 @@ export default function ZodiacNightActionPanel() {
     setSelectedPlayer(null);
     
     // Close panel after action
-    handleClosePanel();
+    handleCloseDesktopPanel();
   };
   
   const renderActionSelector = () => {
@@ -243,7 +251,7 @@ export default function ZodiacNightActionPanel() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Zodiac Night Actions</h2>
         <button
-          onClick={handleClosePanel}
+          onClick={showDesktopPanel ? handleCloseDesktopPanel : handleCloseMobilePanel}
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -278,7 +286,7 @@ export default function ZodiacNightActionPanel() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Zodiac Actions</h2>
         <button
-          onClick={handleClosePanel}
+          onClick={handleCloseMobilePanel}
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -311,9 +319,9 @@ export default function ZodiacNightActionPanel() {
     <>
       {/* Panel for desktop view (fixed position) */}
       <div className="fixed bottom-4 right-4 z-10 hidden md:block">
-        {!showPanel ? (
+        {!showDesktopPanel ? (
           <button
-            onClick={() => setShowPanel(true)}
+            onClick={() => setShowDesktopPanel(true)}
             className="px-4 py-2 bg-indigo-600/90 dark:bg-amber-600/90 text-white rounded-lg shadow-lg hover:bg-indigo-500 dark:hover:bg-amber-500 transition-colors"
           >
             Show Runner Actions
@@ -324,7 +332,7 @@ export default function ZodiacNightActionPanel() {
       </div>
       
       {/* Mobile panel portal: Render content into the container div in GameBoard if the panel should be shown */}
-      {isMounted && showPanel && document.getElementById('zodiac-night-actions-panel-container')
+      {isMounted && showMobilePanel && document.getElementById('zodiac-night-actions-panel-container')
         ? createPortal(
             mobilePanelContent,
             document.getElementById('zodiac-night-actions-panel-container')!
