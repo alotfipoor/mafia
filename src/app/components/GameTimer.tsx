@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export default function GameTimer() {
   const [time, setTime] = useState<number>(60);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [timerDuration, setTimerDuration] = useState<number>(60);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Memoize handle functions to use in useEffect dependencies
   const handleReset = useCallback(() => {
@@ -21,6 +22,34 @@ export default function GameTimer() {
   const handleStop = () => {
     setIsRunning(false);
   };
+  
+  // Countdown timer effect
+  useEffect(() => {
+    if (isRunning) {
+      intervalRef.current = setInterval(() => {
+        setTime(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(intervalRef.current!);
+            intervalRef.current = null;
+            setIsRunning(false);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [isRunning]);
   
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
