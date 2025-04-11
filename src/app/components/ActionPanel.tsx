@@ -3,6 +3,7 @@
 import { useGameContext } from '../context/GameContext';
 import NightActionPanel from './NightActionPanel';
 import CapoNightActionPanel from './CapoNightActionPanel';
+import ZodiacNightActionPanel from './ZodiacNightActionPanel';
 
 export default function ActionPanel() {
   const { gameState } = useGameContext();
@@ -16,7 +17,7 @@ export default function ActionPanel() {
   if (gameState.phase === 'night') {
     switch (gameState.scenario) {
       case 'zodiac':
-        return <NightActionPanel />;
+        return <ZodiacNightActionPanel />;
       case 'capo':
         return <CapoNightActionPanel />;
       case 'classic':

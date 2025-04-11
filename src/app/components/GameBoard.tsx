@@ -234,7 +234,7 @@ export default function GameBoard() {
   const gameStatus = checkGameStatus();
 
   return (
-    <div className="container mx-auto px-4 py-6 mb-20">
+    <div className="container mx-auto px-4 py-6 pb-28 md:pb-20 mb-20">
       <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <div className="flex justify-between items-center">
@@ -504,6 +504,20 @@ export default function GameBoard() {
           {gameState.scenario === 'capo' && (
             <>
               <button 
+                className="flex items-center w-full px-4 py-2 text-left bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg"
+                onClick={() => {
+                  // Toggle the capo night actions panel container
+                  document.getElementById('capo-night-actions-panel-container')?.classList.toggle('hidden');
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Capo Night Actions
+              </button>
+              
+              <button 
                 className="flex items-center w-full px-4 py-2 text-left bg-indigo-100 dark:bg-gray-700 text-indigo-700 dark:text-amber-400 rounded-lg"
                 onClick={() => {
                   setShowCapoControls(prev => !prev);
@@ -545,18 +559,50 @@ export default function GameBoard() {
           )}
 
           {gameState.scenario === 'zodiac' && (
-            <button 
-              className="flex items-center w-full px-4 py-2 text-left bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg"
-              onClick={() => {
-                document.getElementById('bomb-defusal-panel')?.classList.toggle('hidden');
-                document.getElementById('mobile-menu')?.classList.add('hidden');
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              Bomb Defusal
-            </button>
+            <>
+              <button 
+                className="flex items-center w-full px-4 py-2 text-left bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg"
+                onClick={() => {
+                  // Toggle the zodiac runner actions panel container
+                  document.getElementById('zodiac-night-actions-panel-container')?.classList.toggle('hidden');
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Runner Actions
+              </button>
+              
+              <button 
+                className="flex items-center w-full px-4 py-2 text-left bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg"
+                onClick={() => {
+                  document.getElementById('bomb-defusal-panel')?.classList.toggle('hidden');
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Bomb Defusal
+              </button>
+              
+              {gameState.zodiacScenario && gameState.zodiacScenario.roleInquiriesLeft > 0 && (
+                <button 
+                  className="flex items-center w-full px-4 py-2 text-left bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg"
+                  onClick={() => {
+                    // Toggle the role check panel container
+                    document.getElementById('role-check-panel-container')?.classList.toggle('hidden');
+                    document.getElementById('mobile-menu')?.classList.add('hidden');
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Check Roles ({gameState.zodiacScenario.roleInquiriesLeft})
+                </button>
+              )}
+            </>
           )}
           
           <button 
@@ -612,15 +658,27 @@ export default function GameBoard() {
            <BombDefusalPanel />
          </div>
       </div>
+      
+      <div id="role-check-panel-container" className="fixed top-20 right-4 z-[4000] hidden bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+         {/* Role check panel content will be portal'd here */}
+      </div>
+      
+      <div id="capo-night-actions-panel-container" className="fixed top-20 right-4 z-[4000] hidden bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+         {/* Capo night actions panel content will be portal'd here */}
+      </div>
 
       {/* Render components that manage their own content or insert into containers */} 
       <ActionPanel />
       <GameTimer />
 
       {/* Ensure other panels like RoleInquiryPanel/CapoTrusteePanel are handled appropriately */}
-      {/* If they also need to be in containers, add them similarly to the above panels */}
       <RoleInquiryPanel />
       <CapoTrusteePanel />
+
+      {/* New panels for Zodiac scenario */}
+      <div id="zodiac-night-actions-panel-container" className="fixed top-20 right-4 z-[4000] hidden bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80 max-h-[80vh] overflow-y-auto">
+         {/* Zodiac night actions panel content will be portal'd here */}
+      </div>
     </div>
   );
 } 

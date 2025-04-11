@@ -33,11 +33,6 @@ export default function RootLayout({
                 {children}
               </main>
             </div>
-            <footer className="py-4 text-center text-gray-500 dark:text-gray-400 text-sm relative z-10">
-              <p>
-                Developed by <a href="https://alotfipoor.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">Ashkan</a> &copy; {new Date().getFullYear()}
-              </p>
-            </footer>
             <Analytics />
           </GameProvider>
         </ThemeProvider>

@@ -239,7 +239,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const checkPlayerRole = () => {
-    if (!gameState || !gameState.zodiacScenario || gameState.zodiacScenario.roleInquiriesLeft <= 0) return;
+    if (!gameState || !gameState.zodiacScenario) return;
 
     setGameState({
       ...gameState,
@@ -247,7 +247,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         ...gameState.zodiacScenario,
         roleInquiriesLeft: gameState.zodiacScenario.roleInquiriesLeft - 1
       },
-      gameLog: [...gameState.gameLog, `A role inquiry was used. ${gameState.zodiacScenario.roleInquiriesLeft - 1} remaining.`],
+      gameLog: [...gameState.gameLog, `A role check was used. ${gameState.zodiacScenario.roleInquiriesLeft - 1} remaining.`],
     });
   };
 
